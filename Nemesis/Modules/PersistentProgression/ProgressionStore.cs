@@ -7,7 +7,7 @@ namespace Nemesis.Modules.PersistentProgression
 {
     internal static class ProgressionStore
     {
-        private static readonly string DataDir = Path.Combine(MelonUtils.UserDataDirectory, "Nemesis");
+        private static readonly string DataDir = Path.Combine(MelonEnvironment.UserDataDirectory, "Nemesis");
         private static readonly string DataPath = Path.Combine(DataDir, "progression.json");
 
         public static ProgressionData Load()

@@ -7,7 +7,7 @@ namespace Nemesis.Config
 {
     internal static class ConfigManager
     {
-        private static readonly string ConfigDir = Path.Combine(MelonUtils.UserDataDirectory, "Nemesis");
+        private static readonly string ConfigDir = Path.Combine(MelonEnvironment.UserDataDirectory, "Nemesis");
         private static readonly string ConfigPath = Path.Combine(ConfigDir, "config.json");
 
         public static SuiteConfig Load()

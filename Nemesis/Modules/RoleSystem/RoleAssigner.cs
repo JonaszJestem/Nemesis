@@ -27,7 +27,7 @@ namespace Nemesis.Modules.RoleSystem
         public Role GetLocalRole()
         {
             var player = PlayerAPI.GetLocalPlayer();
-            return player != null ? GetRole(player.ActorID) : Role.None;
+            return player != null ? GetRole((uint)player.ActorID) : Role.None;
         }
 
         public void AssignRoles()
@@ -47,7 +47,7 @@ namespace Nemesis.Modules.RoleSystem
                 if (player == null) continue;
 
                 var role = shuffled[i % shuffled.Length];
-                _assignments[player.ActorID] = role;
+                _assignments[(uint)player.ActorID] = role;
 
                 // Only modify local player stats — cannot modify remote clients
                 if (player.AmIAvatar())
@@ -65,7 +65,7 @@ namespace Nemesis.Modules.RoleSystem
                 if (statManager == null) return;
 
                 var baseStats = CachedStats.Capture(statManager);
-                _originalStats[player.ActorID] = baseStats;
+                _originalStats[(uint)player.ActorID] = baseStats;
 
                 var delta = RoleStatDelta.ForRole(role, _config);
                 baseStats.ApplyMultipliers(statManager, delta.MaxHpMultiplier, delta.SpeedMultiplier);

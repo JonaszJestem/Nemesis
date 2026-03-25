@@ -83,11 +83,10 @@ namespace Nemesis.Modules.ProximityRadar
                         {
                             if (monster == null) continue;
 
-                            // VActor extends MonoBehaviour — use transform directly
-                            var comp = monster as Component;
-                            if (comp == null) continue;
-
-                            var pos = comp.transform.position;
+                            // Get position via reflection since VActor is not a Component
+                            var posObj = MimicAPI.GameAPI.ReflectionHelper.GetFieldValue(monster, "_position");
+                            if (posObj == null) continue;
+                            var pos = (Vector3)posObj;
                             if (Vector3.Distance(pos, center) > range) continue;
 
                             _entities.Add(new RadarRenderer.RadarEntity
