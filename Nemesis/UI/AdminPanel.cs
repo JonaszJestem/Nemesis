@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using Nemesis.Config;
 using Nemesis.Core;
 using Nemesis.Modules.ContractBoard;
@@ -63,7 +63,16 @@ namespace Nemesis.UI
             "Tooltip",
             "ESP"
         };
-        private static readonly string[] ClientTabNames = { "Radar", "FOV", "VoiceFix", "Health", "Tooltip", "ESP" };
+
+        private static readonly string[] ClientTabNames =
+        {
+            "Radar",
+            "FOV",
+            "VoiceFix",
+            "Health",
+            "Tooltip",
+            "ESP"
+        };
 
         // Window background
         private Texture2D? _windowBg;
@@ -98,7 +107,8 @@ namespace Nemesis.UI
 
         public void OnGUI()
         {
-            if (!_visible) return;
+            if (!_visible)
+                return;
 
             GUIStyles.EnsureInitialized();
             EnsureWindowBg();
@@ -117,7 +127,9 @@ namespace Nemesis.UI
 
         private void EnsureWindowBg()
         {
-            if (_windowBg != null) return;
+            if (_windowBg != null)
+                return;
+
             _windowBg = new Texture2D(1, 1);
             _windowBg.SetPixel(0, 0, new Color(0.08f, 0.08f, 0.12f, 0.96f));
             _windowBg.Apply();
@@ -147,18 +159,18 @@ namespace Nemesis.UI
                     GUIStyles.SetScale(GetFontScale());
                 }
             }
+
             if (!isHost)
             {
                 GUILayout.Space(10);
                 GUILayout.Label("(Client mode)", GUIStyles.Label);
             }
+
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             GUILayout.Space(5);
-
             DrawTabSelector(tabNames);
-
             GUILayout.Space(8);
 
             // Draw active tab content
@@ -169,17 +181,39 @@ namespace Nemesis.UI
                 switch (_activeTab)
                 {
                     // Host-only gameplay tabs (synced to clients)
-                    case 0: DifficultyTab.Draw(_config.Difficulty); break;
-                    case 1: RoleTab.Draw(_config.Roles); break;
-                    case 2: DamageScaleTab.Draw(_config.DamageScale); break;
-                    case 3: MoreMimicsTab.Draw(_config.MoreMimics); break;
-                    case 4: StaminaTab.Draw(_config.Stamina); break;
-                    case 5: JumpTab.Draw(_config.Jump); break;
-                    case 6: FullbrightTab.Draw(_config.Fullbright); break;
-                    case 7: LootDropTab.Draw(_config.LootDrop); break;
-                    case 8: MoreVoicesTab.Draw(_config.MoreVoices); break;
-                    case 9: NoiseDirectorTab.Draw(_config.NoiseDirector); break;
-                    case 10: RunMutatorDraftTab.Draw(_config.RunMutatorDraft); break;
+                    case 0:
+                        DifficultyTab.Draw(_config.Difficulty);
+                        break;
+                    case 1:
+                        RoleTab.Draw(_config.Roles);
+                        break;
+                    case 2:
+                        DamageScaleTab.Draw(_config.DamageScale);
+                        break;
+                    case 3:
+                        MoreMimicsTab.Draw(_config.MoreMimics);
+                        break;
+                    case 4:
+                        StaminaTab.Draw(_config.Stamina);
+                        break;
+                    case 5:
+                        JumpTab.Draw(_config.Jump);
+                        break;
+                    case 6:
+                        FullbrightTab.Draw(_config.Fullbright);
+                        break;
+                    case 7:
+                        LootDropTab.Draw(_config.LootDrop);
+                        break;
+                    case 8:
+                        MoreVoicesTab.Draw(_config.MoreVoices);
+                        break;
+                    case 9:
+                        NoiseDirectorTab.Draw(_config.NoiseDirector);
+                        break;
+                    case 10:
+                        RunMutatorDraftTab.Draw(_config.RunMutatorDraft);
+                        break;
                     case 11:
                         var tramModule = FindModule<TramTalentTreeModule>();
                         if (tramModule != null)
@@ -190,37 +224,74 @@ namespace Nemesis.UI
                     case 12:
                         ContractBoardTab.Draw(_config.ContractBoard, FindModule<ContractBoardModule>());
                         break;
-                    case 13: PossessionPlusTab.Draw(_config.PossessionPlus); break;
-                    case 14: RivalGhostsTab.Draw(_config.RivalGhosts); break;
-                    case 15: MarkerTab.Draw(_config.Marker); break;
-                    case 16: InventoryExpansionTab.Draw(_config.InventoryExpansion); break;
-                    case 17: AutoLootTab.Draw(_config.AutoLoot); break;
-                    case 18: FlyTab.Draw(_config.Fly); break;
+                    case 13:
+                        PossessionPlusTab.Draw(_config.PossessionPlus);
+                        break;
+                    case 14:
+                        RivalGhostsTab.Draw(_config.RivalGhosts);
+                        break;
+                    case 15:
+                        MarkerTab.Draw(_config.Marker);
+                        break;
+                    case 16:
+                        InventoryExpansionTab.Draw(_config.InventoryExpansion);
+                        break;
+                    case 17:
+                        AutoLootTab.Draw(_config.AutoLoot);
+                        break;
+                    case 18:
+                        FlyTab.Draw(_config.Fly);
+                        break;
                     case 19:
-                        var pm = FindModule<PersistentProgressionModule>();
-                        ProgressionTab.Draw(_config.Progression, pm);
+                        var progressionModule = FindModule<PersistentProgressionModule>();
+                        ProgressionTab.Draw(_config.Progression, progressionModule);
                         break;
                     // Client-visible tabs (local settings)
-                    case 20: RadarTab.Draw(_config.Radar); break;
-                    case 21: FovTab.Draw(_config.Fov); break;
-                    case 22: VoiceFixTab.Draw(_config.VoiceFix); break;
-                    case 23: HealthIndicatorsTab.Draw(_config.HealthIndicators); break;
-                    case 24: TooltipTab.Draw(_config.Tooltip); break;
-                    case 25: EspTab.Draw(_config.Esp); break;
+                    case 20:
+                        RadarTab.Draw(_config.Radar);
+                        break;
+                    case 21:
+                        FovTab.Draw(_config.Fov);
+                        break;
+                    case 22:
+                        VoiceFixTab.Draw(_config.VoiceFix);
+                        break;
+                    case 23:
+                        HealthIndicatorsTab.Draw(_config.HealthIndicators);
+                        break;
+                    case 24:
+                        TooltipTab.Draw(_config.Tooltip);
+                        break;
+                    case 25:
+                        EspTab.Draw(_config.Esp);
+                        break;
                 }
             }
             else
             {
                 switch (_activeTab)
                 {
-                    case 0: RadarTab.Draw(_config.Radar); break;
-                    case 1: FovTab.Draw(_config.Fov); break;
-                    case 2: VoiceFixTab.Draw(_config.VoiceFix); break;
-                    case 3: HealthIndicatorsTab.Draw(_config.HealthIndicators); break;
-                    case 4: TooltipTab.Draw(_config.Tooltip); break;
-                    case 5: EspTab.Draw(_config.Esp); break;
+                    case 0:
+                        RadarTab.Draw(_config.Radar);
+                        break;
+                    case 1:
+                        FovTab.Draw(_config.Fov);
+                        break;
+                    case 2:
+                        VoiceFixTab.Draw(_config.VoiceFix);
+                        break;
+                    case 3:
+                        HealthIndicatorsTab.Draw(_config.HealthIndicators);
+                        break;
+                    case 4:
+                        TooltipTab.Draw(_config.Tooltip);
+                        break;
+                    case 5:
+                        EspTab.Draw(_config.Esp);
+                        break;
                 }
             }
+
             GUILayout.EndScrollView();
 
             GUILayout.FlexibleSpace();
@@ -232,12 +303,14 @@ namespace Nemesis.UI
                 ConfigManager.Save(_config);
                 NemesisMod.Instance?.NotifyConfigChanged();
             }
+
             if (GUILayout.Button("Close [F10]", GUILayout.Height(28)))
             {
                 _visible = false;
                 Cursor.lockState = _previousLockState;
                 Cursor.visible = _previousCursorVisible;
             }
+
             GUILayout.EndHorizontal();
 
             GUI.DragWindow();
@@ -247,6 +320,7 @@ namespace Nemesis.UI
         {
             if (_sizePreset < 0 || _sizePreset >= PresetScales.Length)
                 return 1.0f;
+
             return PresetScales[_sizePreset];
         }
 
@@ -274,12 +348,15 @@ namespace Nemesis.UI
             if (tabNames.Length == 0)
                 return;
 
+            bool activeEnabled = IsTabEnabled(_activeTab, tabNames.Length);
+            string activeLabel = $"{(activeEnabled ? "[ON]" : "[OFF]")} {tabNames[_activeTab]}";
+
             GUILayout.BeginHorizontal();
             GUILayout.Label("Module:", GUIStyles.Label, GUILayout.Width(52));
 
-            if (GUILayout.Button(tabNames[_activeTab], GUIStyles.TabActive, GUILayout.Height(28)))
+            if (GUILayout.Button(activeLabel, GUIStyles.TabActive, GUILayout.Height(28)))
                 _showTabDropdown = !_showTabDropdown;
-            if (GUILayout.Button(_showTabDropdown ? "▲" : "▼", GUILayout.Width(34), GUILayout.Height(28)))
+            if (GUILayout.Button(_showTabDropdown ? "^" : "v", GUILayout.Width(34), GUILayout.Height(28)))
                 _showTabDropdown = !_showTabDropdown;
 
             GUILayout.Space(6);
@@ -297,14 +374,17 @@ namespace Nemesis.UI
             _tabDropdownScroll = GUILayout.BeginScrollView(_tabDropdownScroll, false, true, GUILayout.Height(dropdownHeight));
             for (int i = 0; i < tabNames.Length; i++)
             {
+                bool isEnabled = IsTabEnabled(i, tabNames.Length);
+                string optionLabel = $"{(isEnabled ? "[ON]" : "[OFF]")} {tabNames[i]}";
                 var style = i == _activeTab ? GUIStyles.TabActive : GUIStyles.TabInactive;
-                if (GUILayout.Button(tabNames[i], style, GUILayout.Height(26)))
+                if (GUILayout.Button(optionLabel, style, GUILayout.Height(26)))
                 {
                     _activeTab = i;
                     _showTabDropdown = false;
                     _contentScroll = Vector2.zero;
                 }
             }
+
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
         }
@@ -327,12 +407,64 @@ namespace Nemesis.UI
             _contentScroll = Vector2.zero;
         }
 
+        private bool IsTabEnabled(int tabIndex, int visibleTabCount)
+        {
+            // In client mode, only client-visible tabs exist (6 entries).
+            if (visibleTabCount == ClientTabNames.Length)
+            {
+                return tabIndex switch
+                {
+                    0 => _config.Radar.Enabled,
+                    1 => _config.Fov.Enabled,
+                    2 => _config.VoiceFix.Enabled,
+                    3 => _config.HealthIndicators.Enabled,
+                    4 => _config.Tooltip.Enabled,
+                    5 => _config.Esp.Enabled,
+                    _ => false
+                };
+            }
+
+            // Host mode tab order.
+            return tabIndex switch
+            {
+                0 => _config.Difficulty.Enabled,
+                1 => _config.Roles.Enabled,
+                2 => _config.DamageScale.Enabled,
+                3 => _config.MoreMimics.Enabled,
+                4 => _config.Stamina.Enabled,
+                5 => _config.Jump.Enabled,
+                6 => _config.Fullbright.Enabled,
+                7 => _config.LootDrop.Enabled,
+                8 => _config.MoreVoices.Enabled,
+                9 => _config.NoiseDirector.Enabled,
+                10 => _config.RunMutatorDraft.Enabled,
+                11 => _config.TramTalentTree.Enabled,
+                12 => _config.ContractBoard.Enabled,
+                13 => _config.PossessionPlus.Enabled,
+                14 => _config.RivalGhosts.Enabled,
+                15 => _config.Marker.Enabled,
+                16 => _config.InventoryExpansion.Enabled,
+                17 => _config.AutoLoot.Enabled,
+                18 => _config.Fly.Enabled,
+                19 => _config.Progression.Enabled,
+                20 => _config.Radar.Enabled,
+                21 => _config.Fov.Enabled,
+                22 => _config.VoiceFix.Enabled,
+                23 => _config.HealthIndicators.Enabled,
+                24 => _config.Tooltip.Enabled,
+                25 => _config.Esp.Enabled,
+                _ => false
+            };
+        }
+
         private T? FindModule<T>() where T : class, IModule
         {
-            foreach (var m in _modules)
+            foreach (var module in _modules)
             {
-                if (m is T typed) return typed;
+                if (module is T typed)
+                    return typed;
             }
+
             return null;
         }
     }
