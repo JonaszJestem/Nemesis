@@ -22,23 +22,9 @@ namespace Nemesis.Modules.RivalGhosts
         private string _runId = "";
         private long _runStartedUtcSeconds;
 
-        private readonly GUIStyle _titleStyle = new GUIStyle(GUI.skin.label)
-        {
-            fontSize = 15,
-            fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(1f, 0.82f, 0.55f) }
-        };
-        private readonly GUIStyle _bodyStyle = new GUIStyle(GUI.skin.label)
-        {
-            fontSize = 11,
-            normal = { textColor = new Color(0.92f, 0.92f, 0.95f) }
-        };
-        private readonly GUIStyle _accentStyle = new GUIStyle(GUI.skin.label)
-        {
-            fontSize = 12,
-            fontStyle = FontStyle.Bold,
-            normal = { textColor = new Color(0.85f, 0.95f, 0.55f) }
-        };
+        private GUIStyle? _titleStyle;
+        private GUIStyle? _bodyStyle;
+        private GUIStyle? _accentStyle;
 
         public RivalGhostsModule(RivalGhostsConfig config)
         {
@@ -109,10 +95,11 @@ namespace Nemesis.Modules.RivalGhosts
             if (!_config.Enabled || !_config.ShowHud)
                 return;
 
+            EnsureStyles();
             GUILayout.BeginVertical(GUIStyles.SectionBox, GUILayout.Width(390));
-            GUILayout.Label("Rival Ghosts", _titleStyle);
-            GUILayout.Label($"Current score: {_challenge.CurrentScore}", _accentStyle);
-            GUILayout.Label(_challenge.StatusLine, _bodyStyle);
+            GUILayout.Label("Rival Ghosts", _titleStyle!);
+            GUILayout.Label($"Current score: {_challenge.CurrentScore}", _accentStyle!);
+            GUILayout.Label(_challenge.StatusLine, _bodyStyle!);
 
             var barRect = GUILayoutUtility.GetRect(320, 14);
             GUI.Box(barRect, GUIContent.none);
@@ -120,14 +107,38 @@ namespace Nemesis.Modules.RivalGhosts
 
             GUILayout.Label(string.IsNullOrWhiteSpace(_challenge.RivalName) || _challenge.RivalName == "No rival yet"
                 ? "No rival selected."
-                : $"Rival: {_challenge.RivalName} ({_challenge.RivalScore})", _bodyStyle);
+                : $"Rival: {_challenge.RivalName} ({_challenge.RivalScore})", _bodyStyle!);
 
             GUILayout.Space(4);
-            GUILayout.Label("Top records", _accentStyle);
+            GUILayout.Label("Top records", _accentStyle!);
             foreach (var record in _records.OrderByDescending(x => x.CompositeScore).ThenByDescending(x => x.FinishedUtcSeconds).Take(Math.Max(1, _config.TopRecordsToShow)))
-                GUILayout.Label($"{record.PlayerName}: {record.CompositeScore} pts", _bodyStyle);
+                GUILayout.Label($"{record.PlayerName}: {record.CompositeScore} pts", _bodyStyle!);
 
             GUILayout.EndVertical();
+        }
+
+        private void EnsureStyles()
+        {
+            if (_titleStyle != null)
+                return;
+
+            _titleStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 15,
+                fontStyle = FontStyle.Bold,
+                normal = { textColor = new Color(1f, 0.82f, 0.55f) }
+            };
+            _bodyStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 11,
+                normal = { textColor = new Color(0.92f, 0.92f, 0.95f) }
+            };
+            _accentStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontSize = 12,
+                fontStyle = FontStyle.Bold,
+                normal = { textColor = new Color(0.85f, 0.95f, 0.55f) }
+            };
         }
 
         private void OnSessionStarted()
