@@ -20,9 +20,10 @@ namespace Nemesis.UI
         private Rect _windowRect = new Rect(50, 50, 550, 600);
         private CursorLockMode _previousLockState;
         private bool _previousCursorVisible;
-        private bool _showTabDropdown;
-        private Vector2 _tabDropdownScroll;
+        private Vector2 _navScroll;
         private Vector2 _contentScroll;
+        private string _moduleSearch = string.Empty;
+        private bool _enabledOnly;
 
         // Size presets
         private int _sizePreset = 1; // 0=Small, 1=Medium, 2=Large, 3=XL, 4=2X, 5=3X
@@ -142,13 +143,57 @@ namespace Nemesis.UI
             if (_activeTab >= tabNames.Length)
                 _activeTab = 0;
 
-            // Title
-            GUILayout.Label("Nemesis Admin Panel", GUIStyles.Header);
+            DrawTopBar(isHost);
 
-            // Size preset buttons
+            GUILayout.Space(6);
+
+            float bodyHeight = Mathf.Max(190f, _windowRect.height - 180f);
+            GUILayout.BeginHorizontal(GUILayout.Height(bodyHeight));
+            DrawModuleRail(isHost, tabNames, bodyHeight);
+            GUILayout.Space(8);
+            DrawActiveModulePanel(isHost, tabNames, bodyHeight);
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(8);
+
+            // Bottom actions
             GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Save Config", GUILayout.Height(30)))
+            {
+                ConfigManager.Save(_config);
+                NemesisMod.Instance?.NotifyConfigChanged();
+            }
+
+            if (GUILayout.Button("Close [F10]", GUILayout.Height(30)))
+            {
+                _visible = false;
+                Cursor.lockState = _previousLockState;
+                Cursor.visible = _previousCursorVisible;
+            }
+            GUILayout.EndHorizontal();
+
+            GUI.DragWindow();
+        }
+
+        private void DrawTopBar(bool isHost)
+        {
+            GUILayout.BeginVertical(GUIStyles.SectionBox);
+            GUILayout.BeginHorizontal();
+
+            GUILayout.BeginVertical();
+            GUILayout.Label("Nemesis Control Center", GUIStyles.Header);
+            GUILayout.Label(
+                isHost
+                    ? "Host mode: gameplay changes are synced to all players."
+                    : "Client mode: visual and audio changes are local.",
+                GUIStyles.MutedLabel);
+            GUILayout.EndVertical();
+
             GUILayout.FlexibleSpace();
-            GUILayout.Label("Size:", GUIStyles.Label, GUILayout.Width(35));
+
+            GUILayout.BeginVertical();
+            GUILayout.Label("Scale", GUIStyles.MutedLabel, GUILayout.Width(150));
+            GUILayout.BeginHorizontal();
             for (int i = 0; i < SizeNames.Length; i++)
             {
                 var style = i == _sizePreset ? GUIStyles.TabActive : GUIStyles.TabInactive;
@@ -159,23 +204,84 @@ namespace Nemesis.UI
                     GUIStyles.SetScale(GetFontScale());
                 }
             }
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
 
-            if (!isHost)
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
+        }
+
+        private void DrawModuleRail(bool isHost, string[] tabNames, float bodyHeight)
+        {
+            float railWidth = Mathf.Clamp(_windowRect.width * 0.34f, 220f, 380f);
+
+            GUILayout.BeginVertical(GUIStyles.SectionBox, GUILayout.Width(railWidth), GUILayout.Height(bodyHeight));
+            GUILayout.Label("Modules", GUIStyles.SubHeader);
+            GUILayout.Label("Search and switch quickly", GUIStyles.MutedLabel);
+
+            _moduleSearch = GUILayout.TextField(_moduleSearch ?? string.Empty, GUIStyles.SearchField, GUILayout.Height(24));
+            _enabledOnly = GUILayout.Toggle(_enabledOnly, "Enabled only", GUIStyles.ToggleCompact);
+
+            GUILayout.Space(6);
+
+            _navScroll = GUILayout.BeginScrollView(_navScroll, false, true);
+            var entries = BuildTabEntries(isHost, tabNames);
+            string currentGroup = string.Empty;
+            bool anyVisible = false;
+
+            foreach (var entry in entries)
             {
-                GUILayout.Space(10);
-                GUILayout.Label("(Client mode)", GUIStyles.Label);
+                if (!ShouldShowEntry(entry))
+                    continue;
+
+                if (!string.Equals(currentGroup, entry.Group, StringComparison.Ordinal))
+                {
+                    currentGroup = entry.Group;
+                    GUILayout.Space(4);
+                    GUILayout.Label(currentGroup, GUIStyles.NavGroup);
+                }
+
+                var style = entry.Index == _activeTab ? GUIStyles.NavItemActive : GUIStyles.NavItemInactive;
+                string label = $"{(entry.Enabled ? "[ON]" : "[OFF]")} {entry.Name}";
+                if (GUILayout.Button(label, style, GUILayout.Height(26)))
+                {
+                    _activeTab = entry.Index;
+                    _contentScroll = Vector2.zero;
+                }
+
+                anyVisible = true;
             }
 
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
+            if (!anyVisible)
+            {
+                GUILayout.Space(8);
+                GUILayout.Label("No modules match the current filter.", GUIStyles.MutedLabel);
+            }
 
-            GUILayout.Space(5);
-            DrawTabSelector(tabNames);
-            GUILayout.Space(8);
+            GUILayout.EndScrollView();
+            GUILayout.EndVertical();
+        }
 
-            // Draw active tab content
-            float contentHeight = Mathf.Max(150f, _windowRect.height - (_showTabDropdown ? 330f : 230f));
+        private void DrawActiveModulePanel(bool isHost, string[] tabNames, float bodyHeight)
+        {
+            bool isEnabled = IsTabEnabled(_activeTab, tabNames.Length);
+
+            GUILayout.BeginVertical(GUIStyles.SectionBox, GUILayout.ExpandWidth(true), GUILayout.Height(bodyHeight));
+            GUILayout.Label(tabNames[_activeTab], GUIStyles.ModuleTitle);
+            GUILayout.Label(isEnabled ? "Status: Enabled" : "Status: Disabled", isEnabled ? GUIStyles.StatusOn : GUIStyles.StatusOff);
+            GUILayout.Label("Adjust settings below, then save config.", GUIStyles.MutedLabel);
+
+            GUILayout.Space(6);
+
+            float contentHeight = Mathf.Max(120f, bodyHeight - 100f);
             _contentScroll = GUILayout.BeginScrollView(_contentScroll, false, true, GUILayout.Height(contentHeight));
+            DrawActiveTabContent(isHost);
+            GUILayout.EndScrollView();
+            GUILayout.EndVertical();
+        }
+
+        private void DrawActiveTabContent(bool isHost)
+        {
             if (isHost)
             {
                 switch (_activeTab)
@@ -291,29 +397,48 @@ namespace Nemesis.UI
                         break;
                 }
             }
+        }
 
-            GUILayout.EndScrollView();
-
-            GUILayout.FlexibleSpace();
-
-            // Bottom buttons
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Save Config", GUILayout.Height(28)))
+        private List<TabEntry> BuildTabEntries(bool isHost, string[] tabNames)
+        {
+            var entries = new List<TabEntry>(tabNames.Length);
+            for (int i = 0; i < tabNames.Length; i++)
             {
-                ConfigManager.Save(_config);
-                NemesisMod.Instance?.NotifyConfigChanged();
+                entries.Add(new TabEntry(
+                    i,
+                    tabNames[i],
+                    GetTabGroup(isHost, i),
+                    IsTabEnabled(i, tabNames.Length)));
             }
 
-            if (GUILayout.Button("Close [F10]", GUILayout.Height(28)))
-            {
-                _visible = false;
-                Cursor.lockState = _previousLockState;
-                Cursor.visible = _previousCursorVisible;
-            }
+            return entries;
+        }
 
-            GUILayout.EndHorizontal();
+        private bool ShouldShowEntry(TabEntry entry)
+        {
+            if (_enabledOnly && !entry.Enabled)
+                return false;
 
-            GUI.DragWindow();
+            if (string.IsNullOrWhiteSpace(_moduleSearch))
+                return true;
+
+            string term = _moduleSearch.Trim();
+            return entry.Name.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0
+                   || entry.Group.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static string GetTabGroup(bool isHost, int tabIndex)
+        {
+            if (!isHost)
+                return "Client";
+
+            if (tabIndex <= 7)
+                return "Gameplay";
+            if (tabIndex <= 14)
+                return "Systems";
+            if (tabIndex <= 19)
+                return "Utility";
+            return "Client";
         }
 
         private float GetFontScale()
@@ -341,70 +466,6 @@ namespace Nemesis.UI
             float maxY = Mathf.Max(0f, Screen.height - _windowRect.height);
             _windowRect.x = Mathf.Clamp(_windowRect.x, 0f, maxX);
             _windowRect.y = Mathf.Clamp(_windowRect.y, 0f, maxY);
-        }
-
-        private void DrawTabSelector(string[] tabNames)
-        {
-            if (tabNames.Length == 0)
-                return;
-
-            bool activeEnabled = IsTabEnabled(_activeTab, tabNames.Length);
-            string activeLabel = $"{(activeEnabled ? "[ON]" : "[OFF]")} {tabNames[_activeTab]}";
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Module:", GUIStyles.Label, GUILayout.Width(52));
-
-            if (GUILayout.Button(activeLabel, GUIStyles.TabActive, GUILayout.Height(28)))
-                _showTabDropdown = !_showTabDropdown;
-            if (GUILayout.Button(_showTabDropdown ? "^" : "v", GUILayout.Width(34), GUILayout.Height(28)))
-                _showTabDropdown = !_showTabDropdown;
-
-            GUILayout.Space(6);
-            if (GUILayout.Button("<", GUILayout.Width(30), GUILayout.Height(28)))
-                SelectPreviousTab(tabNames);
-            if (GUILayout.Button(">", GUILayout.Width(30), GUILayout.Height(28)))
-                SelectNextTab(tabNames);
-            GUILayout.EndHorizontal();
-
-            if (!_showTabDropdown)
-                return;
-
-            GUILayout.BeginVertical(GUIStyles.SectionBox);
-            float dropdownHeight = Mathf.Clamp(_windowRect.height * 0.33f, 120f, 260f);
-            _tabDropdownScroll = GUILayout.BeginScrollView(_tabDropdownScroll, false, true, GUILayout.Height(dropdownHeight));
-            for (int i = 0; i < tabNames.Length; i++)
-            {
-                bool isEnabled = IsTabEnabled(i, tabNames.Length);
-                string optionLabel = $"{(isEnabled ? "[ON]" : "[OFF]")} {tabNames[i]}";
-                var style = i == _activeTab ? GUIStyles.TabActive : GUIStyles.TabInactive;
-                if (GUILayout.Button(optionLabel, style, GUILayout.Height(26)))
-                {
-                    _activeTab = i;
-                    _showTabDropdown = false;
-                    _contentScroll = Vector2.zero;
-                }
-            }
-
-            GUILayout.EndScrollView();
-            GUILayout.EndVertical();
-        }
-
-        private void SelectPreviousTab(string[] tabNames)
-        {
-            if (tabNames.Length == 0)
-                return;
-
-            _activeTab = (_activeTab - 1 + tabNames.Length) % tabNames.Length;
-            _contentScroll = Vector2.zero;
-        }
-
-        private void SelectNextTab(string[] tabNames)
-        {
-            if (tabNames.Length == 0)
-                return;
-
-            _activeTab = (_activeTab + 1) % tabNames.Length;
-            _contentScroll = Vector2.zero;
         }
 
         private bool IsTabEnabled(int tabIndex, int visibleTabCount)
@@ -466,6 +527,22 @@ namespace Nemesis.UI
             }
 
             return null;
+        }
+
+        private readonly struct TabEntry
+        {
+            public TabEntry(int index, string name, string group, bool enabled)
+            {
+                Index = index;
+                Name = name;
+                Group = group;
+                Enabled = enabled;
+            }
+
+            public int Index { get; }
+            public string Name { get; }
+            public string Group { get; }
+            public bool Enabled { get; }
         }
     }
 }
