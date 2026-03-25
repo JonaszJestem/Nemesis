@@ -1,0 +1,28 @@
+name: Nemesis - CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Nemesis/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Nemesis/**"
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Run unit tests
+        working-directory: Nemesis/Tests
+        run: dotnet test --configuration Release --verbosity normal
