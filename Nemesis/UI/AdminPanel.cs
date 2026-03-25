@@ -20,8 +20,8 @@ namespace Nemesis.UI
         private Rect _windowRect = new Rect(50, 50, 550, 600);
         private CursorLockMode _previousLockState;
         private bool _previousCursorVisible;
-        private int _hostTabPage;
-        private int _clientTabPage;
+        private bool _showTabDropdown;
+        private Vector2 _tabDropdownScroll;
         private Vector2 _contentScroll;
 
         // Size presets
@@ -127,6 +127,8 @@ namespace Nemesis.UI
         {
             bool isHost = NemesisMod.Instance?.IsHost ?? false;
             string[] tabNames = isHost ? HostTabNames : ClientTabNames;
+            if (_activeTab >= tabNames.Length)
+                _activeTab = 0;
 
             // Title
             GUILayout.Label("Nemesis Admin Panel", GUIStyles.Header);
@@ -155,40 +157,12 @@ namespace Nemesis.UI
 
             GUILayout.Space(5);
 
-            // Tabs
-            int tabsPerPage = GetTabsPerPage();
-            int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)tabNames.Length / tabsPerPage));
-            int currentPage = isHost ? _hostTabPage : _clientTabPage;
-            if (currentPage >= pageCount) currentPage = 0;
-
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("<", GUILayout.Width(28), GUILayout.Height(28)))
-                currentPage = (currentPage - 1 + pageCount) % pageCount;
-            GUILayout.Label($"Tabs {currentPage + 1}/{pageCount}", GUIStyles.Label, GUILayout.Width(90));
-
-            int start = currentPage * tabsPerPage;
-            int endExclusive = Mathf.Min(tabNames.Length, start + tabsPerPage);
-            for (int i = start; i < endExclusive; i++)
-            {
-                var style = i == _activeTab ? GUIStyles.TabActive : GUIStyles.TabInactive;
-                if (GUILayout.Button(tabNames[i], style, GUILayout.Height(28)))
-                    _activeTab = i;
-            }
-
-            if (GUILayout.Button(">", GUILayout.Width(28), GUILayout.Height(28)))
-                currentPage = (currentPage + 1) % pageCount;
-            GUILayout.EndHorizontal();
-            if (isHost) _hostTabPage = currentPage;
-            else _clientTabPage = currentPage;
+            DrawTabSelector(tabNames);
 
             GUILayout.Space(8);
 
-            // Clamp active tab
-            if (_activeTab >= tabNames.Length)
-                _activeTab = 0;
-
             // Draw active tab content
-            float contentHeight = Mathf.Max(150f, _windowRect.height - 200f);
+            float contentHeight = Mathf.Max(150f, _windowRect.height - (_showTabDropdown ? 330f : 230f));
             _contentScroll = GUILayout.BeginScrollView(_contentScroll, false, true, GUILayout.Height(contentHeight));
             if (isHost)
             {
@@ -276,13 +250,6 @@ namespace Nemesis.UI
             return PresetScales[_sizePreset];
         }
 
-        private int GetTabsPerPage()
-        {
-            // Keep tabs readable while ensuring no overflow.
-            float availableWidth = Mathf.Max(200f, _windowRect.width - 180f);
-            return Mathf.Max(1, Mathf.FloorToInt(availableWidth / 90f));
-        }
-
         private void ApplySizePreset(int presetIndex)
         {
             if (presetIndex < 0 || presetIndex >= PresetWidths.Length || presetIndex >= PresetHeights.Length)
@@ -300,6 +267,64 @@ namespace Nemesis.UI
             float maxY = Mathf.Max(0f, Screen.height - _windowRect.height);
             _windowRect.x = Mathf.Clamp(_windowRect.x, 0f, maxX);
             _windowRect.y = Mathf.Clamp(_windowRect.y, 0f, maxY);
+        }
+
+        private void DrawTabSelector(string[] tabNames)
+        {
+            if (tabNames.Length == 0)
+                return;
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Module:", GUIStyles.Label, GUILayout.Width(52));
+
+            if (GUILayout.Button(tabNames[_activeTab], GUIStyles.TabActive, GUILayout.Height(28)))
+                _showTabDropdown = !_showTabDropdown;
+            if (GUILayout.Button(_showTabDropdown ? "▲" : "▼", GUILayout.Width(34), GUILayout.Height(28)))
+                _showTabDropdown = !_showTabDropdown;
+
+            GUILayout.Space(6);
+            if (GUILayout.Button("<", GUILayout.Width(30), GUILayout.Height(28)))
+                SelectPreviousTab(tabNames);
+            if (GUILayout.Button(">", GUILayout.Width(30), GUILayout.Height(28)))
+                SelectNextTab(tabNames);
+            GUILayout.EndHorizontal();
+
+            if (!_showTabDropdown)
+                return;
+
+            GUILayout.BeginVertical(GUIStyles.SectionBox);
+            float dropdownHeight = Mathf.Clamp(_windowRect.height * 0.33f, 120f, 260f);
+            _tabDropdownScroll = GUILayout.BeginScrollView(_tabDropdownScroll, false, true, GUILayout.Height(dropdownHeight));
+            for (int i = 0; i < tabNames.Length; i++)
+            {
+                var style = i == _activeTab ? GUIStyles.TabActive : GUIStyles.TabInactive;
+                if (GUILayout.Button(tabNames[i], style, GUILayout.Height(26)))
+                {
+                    _activeTab = i;
+                    _showTabDropdown = false;
+                    _contentScroll = Vector2.zero;
+                }
+            }
+            GUILayout.EndScrollView();
+            GUILayout.EndVertical();
+        }
+
+        private void SelectPreviousTab(string[] tabNames)
+        {
+            if (tabNames.Length == 0)
+                return;
+
+            _activeTab = (_activeTab - 1 + tabNames.Length) % tabNames.Length;
+            _contentScroll = Vector2.zero;
+        }
+
+        private void SelectNextTab(string[] tabNames)
+        {
+            if (tabNames.Length == 0)
+                return;
+
+            _activeTab = (_activeTab + 1) % tabNames.Length;
+            _contentScroll = Vector2.zero;
         }
 
         private T? FindModule<T>() where T : class, IModule
