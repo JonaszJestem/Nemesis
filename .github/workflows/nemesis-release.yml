@@ -31,7 +31,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
-      release_notes: ${{ steps.notes.outputs.notes }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -41,48 +40,15 @@ jobs:
       - name: Checkout Workspace (game assemblies)
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/Mimesis-Workspace
+          repository: JonaszJestem/Nemesis-Workspace
           path: Workspace
           ssh-key: ${{ secrets.WORKSPACE_TOKEN }}
-
-      - name: Checkout MimicAPI
-        uses: actions/checkout@v4
-        with:
-          repository: NeoMimicry/MimicAPI
-          path: Workspace/MimicAPI
 
       - name: Extract version from tag
         id: version
         run: |
           TAG="${GITHUB_REF#refs/tags/v}"
           echo "version=$TAG" >> $GITHUB_OUTPUT
-          echo "Building Nemesis v$TAG"
-
-      - name: Generate release notes from commits
-        id: notes
-        run: |
-          # Find the previous tag
-          PREV_TAG=$(git tag --sort=-creatordate | grep '^v' | sed -n '2p')
-          if [ -z "$PREV_TAG" ]; then
-            # First release — use all commits
-            COMMITS=$(git log --pretty=format:"- %s" --no-merges)
-          else
-            COMMITS=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s" --no-merges)
-          fi
-
-          # Build release notes
-          NOTES="## What's New in v${{ steps.version.outputs.version }}
-
-          ${COMMITS}
-
-          ## Installation
-          1. Install [MelonLoader](https://melonwiki.xyz)
-          2. Install [MimicAPI](https://thunderstore.io/c/mimesis/p/NeoMimicry/MimicAPI/)
-          3. Drop \`Nemesis.dll\` into your \`MIMESIS/Mods/\` folder
-          4. Press **F10** in-game to open the admin panel"
-
-          # Write to file (multiline output)
-          echo "$NOTES" > release_notes.md
 
       - name: Update version in assembly info
         run: |
@@ -100,35 +66,34 @@ jobs:
           dotnet build "Nemesis.csproj" --configuration Release
           /p:GameAssemblyPath="${{ github.workspace }}/Workspace/lib/game"
           /p:MelonLoaderPath="${{ github.workspace }}/Workspace/lib/melonloader"
-          /p:PluginsPath="${{ github.workspace }}/Workspace/MimicAPI/bin/Release/netstandard2.1"
+          /p:PluginsPath="${{ github.workspace }}/Workspace/lib/game"
 
-      - name: Prepare artifacts
-        run: |
-          mkdir -p artifacts
-          cp Nemesis/bin/Release/netstandard2.1/Nemesis.dll artifacts/
-          cp release_notes.md artifacts/
-
-      - name: Upload artifacts
+      - name: Upload DLL
         uses: actions/upload-artifact@v4
         with:
-          name: nemesis-build
-          path: artifacts/
+          name: nemesis-dll
+          path: Nemesis/bin/Release/netstandard2.1/Nemesis.dll
 
   release:
     name: Publish Release
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifacts
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download DLL
         uses: actions/download-artifact@v4
         with:
-          name: nemesis-build
+          name: nemesis-dll
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: Nemesis v${{ needs.build.outputs.version }}
-          body_path: release_notes.md
+          generate_release_notes: true
           files: Nemesis.dll
           draft: false
           prerelease: false
