@@ -11,7 +11,7 @@ namespace Nemesis.Core
         {
             var stats = new CachedStats();
 
-            var hpVal = MimicAPI.GameAPI.ReflectionHelper.GetFieldValue(statManager, "_maxHp");
+            var hpVal = MimicAPI.GameAPI.ReflectionHelper.GetFieldValue(statManager, GameFieldNames.StatManager_MaxHp);
             if (hpVal is float fHp)
             {
                 stats.MaxHpFloat = fHp;
@@ -23,7 +23,7 @@ namespace Nemesis.Core
                 stats.IsHpFloat = false;
             }
 
-            var speedVal = MimicAPI.GameAPI.ReflectionHelper.GetFieldValue(statManager, "_moveSpeed");
+            var speedVal = MimicAPI.GameAPI.ReflectionHelper.GetFieldValue(statManager, GameFieldNames.StatManager_MoveSpeed);
             if (speedVal is float spd)
                 stats.MoveSpeed = spd;
 
@@ -33,23 +33,23 @@ namespace Nemesis.Core
         public void Restore(object statManager)
         {
             if (IsHpFloat && MaxHpFloat.HasValue)
-                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, "_maxHp", MaxHpFloat.Value);
+                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, GameFieldNames.StatManager_MaxHp, MaxHpFloat.Value);
             else if (!IsHpFloat && MaxHpInt.HasValue)
-                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, "_maxHp", MaxHpInt.Value);
+                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, GameFieldNames.StatManager_MaxHp, MaxHpInt.Value);
 
             if (MoveSpeed.HasValue)
-                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, "_moveSpeed", MoveSpeed.Value);
+                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, GameFieldNames.StatManager_MoveSpeed, MoveSpeed.Value);
         }
 
         public void ApplyMultipliers(object statManager, float hpMult, float speedMult)
         {
             if (IsHpFloat && MaxHpFloat.HasValue)
-                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, "_maxHp", MaxHpFloat.Value * hpMult);
+                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, GameFieldNames.StatManager_MaxHp, MaxHpFloat.Value * hpMult);
             else if (!IsHpFloat && MaxHpInt.HasValue)
-                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, "_maxHp", (int)(MaxHpInt.Value * hpMult));
+                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, GameFieldNames.StatManager_MaxHp, (int)(MaxHpInt.Value * hpMult));
 
             if (MoveSpeed.HasValue)
-                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, "_moveSpeed", MoveSpeed.Value * speedMult);
+                MimicAPI.GameAPI.ReflectionHelper.SetFieldValue(statManager, GameFieldNames.StatManager_MoveSpeed, MoveSpeed.Value * speedMult);
         }
     }
 }

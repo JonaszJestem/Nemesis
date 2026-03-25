@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using MelonLoader;
 using Nemesis.Core;
 using Newtonsoft.Json;
 
@@ -22,7 +21,7 @@ namespace Nemesis.Modules.PersistentProgression
             }
             catch (Exception ex)
             {
-                MelonLogger.Warning($"[Progression] Failed to load data: {ex.Message}");
+                Log.Progression.Warn($"Failed to load data: {ex.Message}");
             }
             return new ProgressionData();
         }
@@ -37,7 +36,7 @@ namespace Nemesis.Modules.PersistentProgression
             }
             catch (Exception ex)
             {
-                MelonLogger.Warning($"[Progression] Failed to save data: {ex.Message}");
+                Log.Progression.Warn($"Failed to save data: {ex.Message}");
             }
         }
     }

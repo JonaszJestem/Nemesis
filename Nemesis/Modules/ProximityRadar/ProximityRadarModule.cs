@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using MelonLoader;
 using MimicAPI.GameAPI;
 using Nemesis.Core;
 using UnityEngine;
@@ -23,7 +22,7 @@ namespace Nemesis.Modules.ProximityRadar
 
         public void Initialize()
         {
-            MelonLogger.Msg("[Nemesis] ProximityRadar initialized");
+            Log.Radar.Msg("Initialized");
         }
 
         public void Shutdown()
@@ -34,6 +33,9 @@ namespace Nemesis.Modules.ProximityRadar
         public void OnUpdate()
         {
             if (!_config.Enabled) return;
+
+            // Always update sweep animation
+            _renderer.UpdateSweep(Time.deltaTime, _config.UpdateRate);
 
             _updateTimer += Time.deltaTime;
             if (_updateTimer < _config.UpdateRate) return;
@@ -84,7 +86,7 @@ namespace Nemesis.Modules.ProximityRadar
                             if (monster == null) continue;
 
                             // Get position via reflection since VActor is not a Component
-                            var posObj = MimicAPI.GameAPI.ReflectionHelper.GetFieldValue(monster, "_position");
+                            var posObj = MimicAPI.GameAPI.ReflectionHelper.GetPropertyValue(monster, GamePropertyNames.VActor_PositionVector);
                             if (posObj == null) continue;
                             var pos = (Vector3)posObj;
                             if (Vector3.Distance(pos, center) > range) continue;
@@ -117,7 +119,7 @@ namespace Nemesis.Modules.ProximityRadar
             }
             catch (Exception ex)
             {
-                MelonLogger.Warning($"[Radar] Refresh error: {ex.Message}");
+                Log.Radar.Warn($"Refresh error: {ex.Message}");
             }
         }
 

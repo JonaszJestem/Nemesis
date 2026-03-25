@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using MimicAPI.GameAPI;
 using Nemesis.Core;
 using Nemesis.Modules.DifficultyDirector.Patches;
+using Nemesis.Modules.EnemyDropLoot.Patches;
+using Nemesis.Modules.PersistentProgression.Patches;
 
 namespace Nemesis.Modules.RoleSystem.Patches
 {
@@ -13,48 +13,24 @@ namespace Nemesis.Modules.RoleSystem.Patches
     {
         static IEnumerable<MethodBase> TargetMethods()
         {
-            var methods = new List<MethodBase>();
+            var method = GameReflection.FindMethod(GameTypeNames.GameSessionInfo, GameMethodNames.GameSessionInfo_StartSession, includeStatic: true);
+            if (method != null)
+                return new List<MethodBase> { method };
 
-            try
-            {
-                var assembly = ServerNetworkAPI.GetGameAssembly();
-                if (assembly == null) return methods;
-
-                // Only use one reliable session start signal
-                // Prefer GameSessionInfo.StartSession if available
-                var sessionType = assembly.GetType("GameSessionInfo");
-                if (sessionType != null)
-                {
-                    var startMethod = sessionType.GetMethod("StartSession",
-                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public |
-                        BindingFlags.Static);
-                    if (startMethod != null)
-                    {
-                        methods.Add(startMethod);
-                        return methods; // Use only this one
-                    }
-                }
-
-                // Fallback: VRoomManager.EnterWaitingRoom
-                var vroomManagerType = assembly.GetType("VRoomManager");
-                if (vroomManagerType != null)
-                {
-                    var enterMethod = vroomManagerType.GetMethod("EnterWaitingRoom",
-                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                    if (enterMethod != null)
-                        methods.Add(enterMethod);
-                }
-            }
-            catch { }
-
-            return methods;
+            return GameReflection.FindTargetMethods(
+                (GameTypeNames.VRoomManager, GameMethodNames.VRoomManager_EnterWaitingRoom));
         }
 
         static void Postfix()
         {
             try
             {
+                // Clear all deduplication sets for new session
                 MonsterStatPatch.ClearTracking();
+                KillRewardPatch.ClearRecentKills();
+                ClientDeathPatch.ClearRecentDeaths();
+                VMonsterOnDeadPatch.ClearProcessedDeaths();
+
                 ModuleEventBus.RaiseSessionStarted();
             }
             catch { }

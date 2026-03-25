@@ -1,5 +1,4 @@
 using System;
-using MelonLoader;
 using MimicAPI.GameAPI;
 using Nemesis.Core;
 using Nemesis.Modules.DifficultyDirector;
@@ -43,18 +42,22 @@ namespace Nemesis.Modules.PersistentProgression
         {
             ModuleEventBus.OnMonsterKilled += OnMonsterKilled;
             ModuleEventBus.OnLootCollected += OnLootCollected;
+            ModuleEventBus.OnItemSold += OnItemSold;
             ModuleEventBus.OnRoomCleared += OnRoomCleared;
             ModuleEventBus.OnSessionStarted += OnSessionStarted;
+            ModuleEventBus.OnMonsterLootDrop += OnMonsterLootDrop;
 
-            MelonLogger.Msg("[Nemesis] PersistentProgression initialized");
+            Log.Progression.Msg("Initialized");
         }
 
         public void Shutdown()
         {
             ModuleEventBus.OnMonsterKilled -= OnMonsterKilled;
             ModuleEventBus.OnLootCollected -= OnLootCollected;
+            ModuleEventBus.OnItemSold -= OnItemSold;
             ModuleEventBus.OnRoomCleared -= OnRoomCleared;
             ModuleEventBus.OnSessionStarted -= OnSessionStarted;
+            ModuleEventBus.OnMonsterLootDrop -= OnMonsterLootDrop;
 
             if (_dirty) ProgressionStore.Save(_data);
         }
@@ -118,6 +121,19 @@ namespace Nemesis.Modules.PersistentProgression
             _localPlayer.TotalKills++;
         }
 
+        private void OnMonsterLootDrop()
+        {
+            if (!_config.Enabled) return;
+            EnsureLocalPlayer();
+            if (_localPlayer == null) return;
+
+            int xp = _config.MonsterLootDropXP;
+            if (_config.ScaleWithDifficulty)
+                xp = (int)(xp * DifficultyDirectorModule.CurrentMultiplier);
+
+            AddXP(xp);
+        }
+
         private void OnLootCollected()
         {
             if (!_config.Enabled) return;
@@ -126,6 +142,15 @@ namespace Nemesis.Modules.PersistentProgression
 
             AddXP(_config.LootCollectedXP);
             _localPlayer.TotalLootCollected++;
+        }
+
+        private void OnItemSold()
+        {
+            if (!_config.Enabled) return;
+            EnsureLocalPlayer();
+            if (_localPlayer == null) return;
+
+            AddXP(_config.SellXP);
         }
 
         private void OnRoomCleared()
@@ -162,7 +187,7 @@ namespace Nemesis.Modules.PersistentProgression
 
             if (_localPlayer.Level > _previousLevel)
             {
-                MelonLogger.Msg($"[Progression] Level up! Now level {_localPlayer.Level}");
+                Log.Progression.Msg($"Level up! Now level {_localPlayer.Level}");
                 _previousLevel = _localPlayer.Level;
                 RecacheLevelBoundaries();
                 ApplyLevelBonuses();
@@ -190,7 +215,7 @@ namespace Nemesis.Modules.PersistentProgression
             }
             catch (Exception ex)
             {
-                MelonLogger.Warning($"[Progression] Failed to apply bonuses: {ex.Message}");
+                Log.Progression.Warn($"Failed to apply bonuses: {ex.Message}");
             }
         }
 

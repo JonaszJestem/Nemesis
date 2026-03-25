@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
@@ -20,5 +20,39 @@
         <Compile Include="..\Modules\RoleSystem\RoleConfig.cs" Link="RoleConfig.cs" />
         <Compile Include="..\Core\ModuleEventBus.cs" Link="ModuleEventBus.cs" />
         <Compile Include="..\Modules\ProximityRadar\RadarConfig.cs" Link="RadarConfig.cs" />
+        <Compile Include="..\Core\LobbyKeys.cs" Link="LobbyKeys.cs" />
+        <Compile Include="..\Core\ConfigSyncLogic.cs" Link="ConfigSyncLogic.cs" />
+        <Compile Include="..\Core\HostConfig.cs" Link="HostConfig.cs" />
+        <Compile Include="..\Config\SuiteConfig.cs" Link="SuiteConfig.cs" />
+        <Compile Include="..\Modules\DamageScale\DamageScaleConfig.cs" Link="DamageScaleConfig.cs" />
+        <Compile Include="..\Modules\MoreMimics\MoreMimicsConfig.cs" Link="MoreMimicsConfig.cs" />
+        <Compile Include="..\Modules\Stamina\StaminaConfig.cs" Link="StaminaConfig.cs" />
+        <Compile Include="..\Modules\Jump\JumpConfig.cs" Link="JumpConfig.cs" />
+        <Compile Include="..\Modules\Fullbright\FullbrightConfig.cs" Link="FullbrightConfig.cs" />
+        <Compile Include="..\Modules\Fov\FovConfig.cs" Link="FovConfig.cs" />
+        <Compile Include="..\Modules\VoiceFix\VoiceFixConfig.cs" Link="VoiceFixConfig.cs" />
+        <Compile Include="..\Modules\HealthIndicators\HealthIndicatorsConfig.cs" Link="HealthIndicatorsConfig.cs" />
+        <Compile Include="..\Modules\EnemyDropLoot\LootDropConfig.cs" Link="LootDropConfig.cs" />
+        <Compile Include="..\Modules\MoreVoices\MoreVoicesConfig.cs" Link="MoreVoicesConfig.cs" />
+        <Compile Include="..\Modules\RunMutatorDraft\RunMutatorDraftConfig.cs" Link="RunMutatorDraftConfig.cs" />
+        <Compile Include="..\Modules\RunMutatorDraft\RunMutatorDraftDefinitions.cs" Link="RunMutatorDraftDefinitions.cs" />
+        <Compile Include="..\Modules\RunMutatorDraft\RunMutatorDraftPlanner.cs" Link="RunMutatorDraftPlanner.cs" />
+        <Compile Include="..\Modules\TramTalentTree\TramTalentTreeConfig.cs" Link="TramTalentTreeConfig.cs" />
+        <Compile Include="..\Modules\ContractBoard\ContractBoardConfig.cs" Link="ContractBoardConfig.cs" />
+        <Compile Include="..\Modules\ContractBoard\ContractBoardLogic.cs" Link="ContractBoardLogic.cs" />
+        <Compile Include="..\Modules\PossessionPlus\PossessionPlusConfig.cs" Link="PossessionPlusConfig.cs" />
+        <Compile Include="..\Modules\PossessionPlus\PossessionPlusModels.cs" Link="PossessionPlusModels.cs" />
+        <Compile Include="..\Modules\RivalGhosts\RivalGhostsConfig.cs" Link="RivalGhostsConfig.cs" />
+        <Compile Include="..\Modules\RivalGhosts\RivalGhostsModels.cs" Link="RivalGhostsModels.cs" />
+        <Compile Include="..\Modules\NoiseDirector\NoiseDirectorConfig.cs" Link="NoiseDirectorConfig.cs" />
+        <Compile Include="..\Modules\TooltipMod\TooltipConfig.cs" Link="TooltipConfig.cs" />
+        <Compile Include="..\Modules\AutoLoot\AutoLootConfig.cs" Link="AutoLootConfig.cs" />
+        <Compile Include="..\Modules\Esp\EspConfig.cs" Link="EspConfig.cs" />
+        <Compile Include="..\Modules\Fly\FlyConfig.cs" Link="FlyConfig.cs" />
+        <Compile Include="..\Modules\Marker\MarkerConfig.cs" Link="MarkerConfig.cs" />
+        <Compile Include="..\Modules\InventoryExpansion\InventoryExpansionConfig.cs" Link="InventoryExpansionConfig.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 </Project>

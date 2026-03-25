@@ -16,10 +16,10 @@ namespace Nemesis.Core
                 // Try MelonEnvironment first (newer MelonLoader)
                 try
                 {
-                    var envType = Type.GetType("MelonLoader.Utils.MelonEnvironment, MelonLoader");
+                    var envType = Type.GetType(GameTypeNames.MelonEnvironment);
                     if (envType != null)
                     {
-                        var prop = envType.GetProperty("UserDataDirectory",
+                        var prop = envType.GetProperty(GamePropertyNames.MelonEnvironment_UserDataDirectory,
                             System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                         if (prop != null)
                         {
@@ -33,10 +33,10 @@ namespace Nemesis.Core
                 // Try MelonUtils (older MelonLoader)
                 try
                 {
-                    var utilsType = Type.GetType("MelonLoader.MelonUtils, MelonLoader");
+                    var utilsType = Type.GetType(GameTypeNames.MelonUtils);
                     if (utilsType != null)
                     {
-                        var prop = utilsType.GetProperty("UserDataDirectory",
+                        var prop = utilsType.GetProperty(GamePropertyNames.MelonEnvironment_UserDataDirectory,
                             System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                         if (prop != null)
                         {

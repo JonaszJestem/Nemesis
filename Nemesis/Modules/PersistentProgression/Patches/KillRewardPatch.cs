@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using MimicAPI.GameAPI;
 using Nemesis.Core;
 
 namespace Nemesis.Modules.PersistentProgression.Patches
@@ -10,45 +8,31 @@ namespace Nemesis.Modules.PersistentProgression.Patches
     [HarmonyPatch]
     internal class KillRewardPatch
     {
+        // Deduplication: track recently killed monster hashes to prevent repeat XP
+        private static readonly HashSet<int> _recentKills = new HashSet<int>();
+
         static IEnumerable<MethodBase> TargetMethods()
         {
-            var methods = new List<MethodBase>();
-
-            try
-            {
-                var assembly = ServerNetworkAPI.GetGameAssembly();
-                if (assembly == null) return methods;
-
-                // Only patch VMonster.OnDead — not VActor — to avoid double XP
-                var vMonsterType = assembly.GetType("VMonster");
-                if (vMonsterType != null)
-                {
-                    var onDeadMethod = vMonsterType.GetMethod("OnDead",
-                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                    if (onDeadMethod != null)
-                    {
-                        methods.Add(onDeadMethod);
-                        return methods;
-                    }
-
-                    var dieMethod = vMonsterType.GetMethod("Die",
-                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                    if (dieMethod != null)
-                        methods.Add(dieMethod);
-                }
-            }
-            catch { }
-
-            return methods;
+            return GameReflection.FindTargetMethods(true,
+                (GameTypeNames.VMonster, GameMethodNames.VMonster_OnDead),
+                (GameTypeNames.VMonster, GameMethodNames.VMonster_Die));
         }
 
-        static void Postfix()
+        static void Postfix(object __instance)
         {
             try
             {
+                int hash = __instance.GetHashCode();
+                if (!_recentKills.Add(hash)) return; // Already processed
+
                 ModuleEventBus.RaiseMonsterKilled();
             }
             catch { }
+        }
+
+        internal static void ClearRecentKills()
+        {
+            _recentKills.Clear();
         }
     }
 }

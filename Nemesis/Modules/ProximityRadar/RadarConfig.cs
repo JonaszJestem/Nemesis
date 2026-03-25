@@ -6,7 +6,7 @@ namespace Nemesis.Modules.ProximityRadar
         public float Range { get; set; } = 50f;
         public int RadarSize { get; set; } = 180;
         public float RadarOpacity { get; set; } = 0.7f;
-        public float UpdateRate { get; set; } = 0.25f;
+        public float UpdateRate { get; set; } = 0.75f;
 
         // Entity toggles
         public bool ShowMonsters { get; set; } = true;

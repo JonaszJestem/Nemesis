@@ -8,8 +8,10 @@ namespace Nemesis.Modules.PersistentProgression
         // XP rewards (configurable)
         public int KillXP { get; set; } = 25;
         public int LootCollectedXP { get; set; } = 10;
+        public int SellXP { get; set; } = 15;
         public int RoomClearedXP { get; set; } = 50;
         public int SessionSurvivedXP { get; set; } = 100;
+        public int MonsterLootDropXP { get; set; } = 15;
 
         // Scale XP with difficulty multiplier
         public bool ScaleWithDifficulty { get; set; } = true;

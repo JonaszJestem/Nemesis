@@ -11,8 +11,12 @@ namespace Nemesis.Modules.ProximityRadar
         private Texture2D? _dotGreen;
         private Texture2D? _dotWhite;
         private Texture2D? _borderTexture;
+        private Texture2D? _sweepTexture;
         private GUIStyle? _labelStyle;
         private bool _initialized;
+
+        // Sweep animation state
+        private float _sweepAngle;
 
         internal struct RadarEntity
         {
@@ -27,6 +31,13 @@ namespace Nemesis.Modules.ProximityRadar
             Player
         }
 
+        public void UpdateSweep(float deltaTime, float updateRate)
+        {
+            // Complete one revolution per update cycle
+            float sweepSpeed = 360f / Mathf.Max(updateRate, 0.1f);
+            _sweepAngle = (_sweepAngle + sweepSpeed * deltaTime) % 360f;
+        }
+
         public void EnsureInitialized()
         {
             if (_initialized) return;
@@ -37,6 +48,7 @@ namespace Nemesis.Modules.ProximityRadar
             _dotYellow = MakeTexture(new Color(1f, 0.85f, 0.1f, 1f));
             _dotGreen = MakeTexture(new Color(0.2f, 1f, 0.4f, 1f));
             _dotWhite = MakeTexture(Color.white);
+            _sweepTexture = MakeTexture(new Color(0.3f, 1f, 0.5f, 0.25f));
             _labelStyle = new GUIStyle(GUI.skin.label)
             {
                 fontSize = 10,
@@ -64,14 +76,18 @@ namespace Nemesis.Modules.ProximityRadar
             GUI.DrawTexture(new Rect(radarRect.x - 2, radarRect.y, 2, radarRect.height), _borderTexture);
             GUI.DrawTexture(new Rect(radarRect.xMax, radarRect.y, 2, radarRect.height), _borderTexture);
 
-            // Center crosshair
             float cx = radarRect.x + radarRect.width / 2f;
             float cy = radarRect.y + radarRect.height / 2f;
+            float halfSize = radarRect.width / 2f;
+
+            // Sweep line
+            DrawSweepLine(cx, cy, halfSize);
+
+            // Center crosshair
             GUI.DrawTexture(new Rect(cx - 3, cy, 7, 1), _dotWhite);
             GUI.DrawTexture(new Rect(cx, cy - 3, 1, 7), _dotWhite);
 
-            float halfSize = radarRect.width / 2f;
-
+            // Entities
             foreach (var entity in entities)
             {
                 float dx = entity.WorldPosition.x - playerPos.x;
@@ -123,6 +139,23 @@ namespace Nemesis.Modules.ProximityRadar
             GUI.color = prevColor;
         }
 
+        private void DrawSweepLine(float cx, float cy, float halfSize)
+        {
+            float rad = _sweepAngle * Mathf.Deg2Rad;
+            float endX = cx + Mathf.Sin(rad) * (halfSize - 4);
+            float endY = cy - Mathf.Cos(rad) * (halfSize - 4);
+
+            // Draw sweep line as a series of small segments
+            int segments = 20;
+            for (int i = 0; i < segments; i++)
+            {
+                float t = (float)i / segments;
+                float sx = Mathf.Lerp(cx, endX, t);
+                float sy = Mathf.Lerp(cy, endY, t);
+                GUI.DrawTexture(new Rect(sx, sy, 2, 2), _sweepTexture);
+            }
+        }
+
         public void Destroy()
         {
             if (_bgTexture != null) Object.Destroy(_bgTexture);
@@ -131,12 +164,14 @@ namespace Nemesis.Modules.ProximityRadar
             if (_dotYellow != null) Object.Destroy(_dotYellow);
             if (_dotGreen != null) Object.Destroy(_dotGreen);
             if (_dotWhite != null) Object.Destroy(_dotWhite);
+            if (_sweepTexture != null) Object.Destroy(_sweepTexture);
             _bgTexture = null;
             _borderTexture = null;
             _dotRed = null;
             _dotYellow = null;
             _dotGreen = null;
             _dotWhite = null;
+            _sweepTexture = null;
             _labelStyle = null;
             _initialized = false;
         }

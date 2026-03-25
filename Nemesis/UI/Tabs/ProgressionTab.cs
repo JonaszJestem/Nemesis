@@ -20,6 +20,7 @@ namespace Nemesis.UI.Tabs
             GUILayout.BeginVertical(GUIStyles.SectionBox);
             config.KillXP = GUIStyles.LabeledIntSlider("Kill XP", config.KillXP, 0, 200);
             config.LootCollectedXP = GUIStyles.LabeledIntSlider("Loot Collected XP", config.LootCollectedXP, 0, 100);
+            config.SellXP = GUIStyles.LabeledIntSlider("Sell/Barter XP", config.SellXP, 0, 100);
             config.RoomClearedXP = GUIStyles.LabeledIntSlider("Room Cleared XP", config.RoomClearedXP, 0, 500);
             config.SessionSurvivedXP = GUIStyles.LabeledIntSlider("Session Survived XP", config.SessionSurvivedXP, 0, 500);
             config.ScaleWithDifficulty = GUIStyles.LabeledToggle("Scale XP with Difficulty", config.ScaleWithDifficulty);

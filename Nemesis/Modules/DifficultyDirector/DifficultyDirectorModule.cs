@@ -1,5 +1,4 @@
 using System;
-using MelonLoader;
 using MimicAPI.GameAPI;
 using Nemesis.Core;
 using UnityEngine;
@@ -26,7 +25,7 @@ namespace Nemesis.Modules.DifficultyDirector
 
         public void Initialize()
         {
-            MelonLogger.Msg("[Nemesis] DifficultyDirector initialized");
+            Log.Difficulty.Msg("Initialized");
         }
 
         public void Shutdown()
@@ -69,7 +68,7 @@ namespace Nemesis.Modules.DifficultyDirector
             }
             catch (Exception ex)
             {
-                MelonLogger.Warning($"[DifficultyDirector] Update error: {ex.Message}");
+                Log.Difficulty.Warn($"Update error: {ex.Message}");
             }
         }
 
