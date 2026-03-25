@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AssemblyName>Nemesis</AssemblyName>
+        <Nullable>enable</Nullable>
+        <WarningLevel>4</WarningLevel>
+        <NoWarn>$(NoWarn);MSB3277;MSB3270</NoWarn>
+    </PropertyGroup>
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>Nemesis.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="0Harmony">
+            <HintPath>$(MelonLoaderPath)\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(GameAssemblyPath)\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+            <HintPath>$(GameAssemblyPath)\Assembly-CSharp-firstpass.dll</HintPath>
+        </Reference>
+        <Reference Include="com.rlabrecque.steamworks.net">
+            <HintPath>$(GameAssemblyPath)\com.rlabrecque.steamworks.net.dll</HintPath>
+        </Reference>
+        <Reference Include="DissonanceVoip">
+            <HintPath>$(GameAssemblyPath)\DissonanceVoip.dll</HintPath>
+        </Reference>
+        <Reference Include="DissonanceVoip.FishNet">
+            <HintPath>$(GameAssemblyPath)\DissonanceVoip.FishNet.dll</HintPath>
+        </Reference>
+        <Reference Include="FishNet.Runtime">
+            <HintPath>$(GameAssemblyPath)\FishNet.Runtime.dll</HintPath>
+        </Reference>
+        <Reference Include="MelonLoader">
+            <HintPath>$(MelonLoaderPath)\MelonLoader.dll</HintPath>
+        </Reference>
+        <Reference Include="MimicAPI">
+            <HintPath>$(PluginsPath)\MimicAPI.dll</HintPath>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(GameAssemblyPath)\Newtonsoft.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>$(GameAssemblyPath)\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(GameAssemblyPath)\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>$(GameAssemblyPath)\UnityEngine.IMGUIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>$(GameAssemblyPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>$(GameAssemblyPath)\UnityEngine.UIModule.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+</Project>

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="NUnit" Version="3.14.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <!-- Pure logic classes with no game deps -->
+        <Compile Include="..\Modules\DifficultyDirector\DifficultyCalculator.cs" Link="DifficultyCalculator.cs" />
+        <Compile Include="..\Modules\DifficultyDirector\DifficultyConfig.cs" Link="DifficultyConfig.cs" />
+        <Compile Include="..\Modules\PersistentProgression\LevelTable.cs" Link="LevelTable.cs" />
+        <Compile Include="..\Modules\PersistentProgression\ProgressionConfig.cs" Link="ProgressionConfig.cs" />
+        <Compile Include="..\Modules\PersistentProgression\ProgressionData.cs" Link="ProgressionData.cs" />
+        <Compile Include="..\Modules\RoleSystem\RoleDefinitions.cs" Link="RoleDefinitions.cs" />
+        <Compile Include="..\Modules\RoleSystem\RoleConfig.cs" Link="RoleConfig.cs" />
+        <Compile Include="..\Core\ModuleEventBus.cs" Link="ModuleEventBus.cs" />
+        <Compile Include="..\Modules\ProximityRadar\RadarConfig.cs" Link="RadarConfig.cs" />
+    </ItemGroup>
+</Project>
