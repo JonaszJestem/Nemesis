@@ -255,6 +255,7 @@ namespace Nemesis.Tests
             var cfg = new FlyConfig();
             Assert.IsFalse(cfg.Enabled);
             Assert.Greater(cfg.FlySpeed, 0f);
+            Assert.IsFalse(cfg.UseSpaceShiftVertical);
         }
 
         [Test]

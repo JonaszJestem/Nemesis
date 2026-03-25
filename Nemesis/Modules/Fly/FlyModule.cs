@@ -9,6 +9,8 @@ namespace Nemesis.Modules.Fly
     internal class FlyModule : IModule
     {
         public string Name => "Fly";
+        private const float MinDirectionSqrMagnitude = 0.01f;
+        private const float FallbackDownwardDampen = 0.2f;
 
         private readonly FlyConfig _config;
 
@@ -39,27 +41,19 @@ namespace Nemesis.Modules.Fly
                 var cam = Camera.main;
                 if (cam == null) return;
 
-                Vector3 direction = Vector3.zero;
-                Vector3 forward = cam.transform.forward;
-                Vector3 right = cam.transform.right;
+                Vector3 direction = GetDirectionFromInput(keyboard, cam.transform);
+                if (direction.sqrMagnitude <= MinDirectionSqrMagnitude)
+                    return;
 
-                // Flatten forward/right for horizontal movement
-                forward.y = 0f;
-                forward.Normalize();
-                right.y = 0f;
-                right.Normalize();
-
-                if (keyboard.wKey.isPressed) direction += forward;
-                if (keyboard.sKey.isPressed) direction -= forward;
-                if (keyboard.dKey.isPressed) direction += right;
-                if (keyboard.aKey.isPressed) direction -= right;
-                if (keyboard.spaceKey.isPressed) direction += Vector3.up;
-                if (keyboard.leftShiftKey.isPressed) direction -= Vector3.up;
-
-                if (direction.sqrMagnitude > 0.01f)
+                direction.Normalize();
+                Vector3 delta = direction * _config.FlySpeed * Time.deltaTime;
+                if (!TryMoveWithCharacterController(player, delta))
                 {
-                    direction.Normalize();
-                    player.transform.position += direction * _config.FlySpeed * Time.deltaTime;
+                    // Fallback when controller is unavailable; damp downward movement
+                    // to reduce clipping through floors.
+                    if (delta.y < 0f)
+                        delta.y *= FallbackDownwardDampen;
+                    player.transform.position += delta;
                 }
 
                 // Prevent fall damage by keeping grounded true via reflection
@@ -68,6 +62,50 @@ namespace Nemesis.Modules.Fly
             catch (Exception ex)
             {
                 Log.Fly.Warn($"Fly error: {ex.Message}");
+            }
+        }
+
+        private Vector3 GetDirectionFromInput(Keyboard keyboard, Transform cameraTransform)
+        {
+            Vector3 direction = Vector3.zero;
+
+            Vector3 forward = cameraTransform.forward;
+            Vector3 right = cameraTransform.right;
+
+            // Flatten forward/right for horizontal movement.
+            forward.y = 0f;
+            right.y = 0f;
+            forward.Normalize();
+            right.Normalize();
+
+            if (keyboard.wKey.isPressed) direction += forward;
+            if (keyboard.sKey.isPressed) direction -= forward;
+            if (keyboard.dKey.isPressed) direction += right;
+            if (keyboard.aKey.isPressed) direction -= right;
+
+            bool ascend = keyboard.eKey.isPressed || (_config.UseSpaceShiftVertical && keyboard.spaceKey.isPressed);
+            bool descend = keyboard.qKey.isPressed || (_config.UseSpaceShiftVertical && keyboard.leftShiftKey.isPressed);
+
+            if (ascend) direction += Vector3.up;
+            if (descend) direction -= Vector3.up;
+
+            return direction;
+        }
+
+        private static bool TryMoveWithCharacterController(Component player, Vector3 delta)
+        {
+            try
+            {
+                var characterController = player.GetComponent("CharacterController");
+                if (characterController == null)
+                    return false;
+
+                ReflectionHelper.InvokeMethod(characterController, "Move", delta);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
