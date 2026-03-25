@@ -1,14 +1,14 @@
 using System;
 using System.IO;
 using MelonLoader;
+using Nemesis.Core;
 using Newtonsoft.Json;
 
 namespace Nemesis.Config
 {
     internal static class ConfigManager
     {
-        private static readonly string ConfigDir = Path.Combine(MelonEnvironment.UserDataDirectory, "Nemesis");
-        private static readonly string ConfigPath = Path.Combine(ConfigDir, "config.json");
+        private static readonly string ConfigPath = Path.Combine(Paths.NemesisDir, "config.json");
 
         public static SuiteConfig Load()
         {
@@ -31,7 +31,7 @@ namespace Nemesis.Config
         {
             try
             {
-                Directory.CreateDirectory(ConfigDir);
+                Directory.CreateDirectory(Paths.NemesisDir);
                 string json = JsonConvert.SerializeObject(config, Formatting.Indented);
                 File.WriteAllText(ConfigPath, json);
             }

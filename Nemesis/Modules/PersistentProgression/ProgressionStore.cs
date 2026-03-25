@@ -1,14 +1,14 @@
 using System;
 using System.IO;
 using MelonLoader;
+using Nemesis.Core;
 using Newtonsoft.Json;
 
 namespace Nemesis.Modules.PersistentProgression
 {
     internal static class ProgressionStore
     {
-        private static readonly string DataDir = Path.Combine(MelonEnvironment.UserDataDirectory, "Nemesis");
-        private static readonly string DataPath = Path.Combine(DataDir, "progression.json");
+        private static readonly string DataPath = Path.Combine(Paths.NemesisDir, "progression.json");
 
         public static ProgressionData Load()
         {
@@ -31,7 +31,7 @@ namespace Nemesis.Modules.PersistentProgression
         {
             try
             {
-                Directory.CreateDirectory(DataDir);
+                Directory.CreateDirectory(Paths.NemesisDir);
                 string json = JsonConvert.SerializeObject(data, Formatting.Indented);
                 File.WriteAllText(DataPath, json);
             }
