@@ -53,7 +53,7 @@ jobs:
       - name: Update version in assembly info
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          sed -i "s/\"Nemesis\", \".*\"/\"Nemesis\", \"${VERSION}\"/" Nemesis/Core/NemesisMod.cs
+          sed -i "s/\"Nemesis\", \"[0-9]*\.[0-9]*\.[0-9]*\"/\"Nemesis\", \"${VERSION}\"/" Nemesis/Core/NemesisMod.cs
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4

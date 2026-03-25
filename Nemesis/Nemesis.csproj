@@ -7,6 +7,9 @@
         <NoWarn>$(NoWarn);MSB3277;MSB3270</NoWarn>
     </PropertyGroup>
     <ItemGroup>
+        <Compile Remove="Tests/**" />
+    </ItemGroup>
+    <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
             <_Parameter1>Nemesis.Tests</_Parameter1>
         </AssemblyAttribute>
